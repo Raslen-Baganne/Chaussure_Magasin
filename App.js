@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import ProductScreen from './screens/ProductScreen';
+import ShoppingCart from './screens/ShoppingCart';
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const App = () => {
+  const [cart, setCart] = useState([]);
+
+  const handleAddToCart = (product) => {
+    setCart(prevCart => {
+      const productIndex = prevCart.findIndex(item => item.product.id === product.id);
+      if (productIndex === -1) {
+        return [...prevCart, { product, quantity: 1 }];
+      } else {
+        const updatedCart = [...prevCart];
+        updatedCart[productIndex].quantity += 1;
+        return updatedCart;
+      }
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="ProductScreen">
+        <Stack.Screen
+          name="ProductScreen"
+          component={ProductScreen}
+          initialParams={{ cart, onAddToCart: handleAddToCart }}
+        />
+        <Stack.Screen
+          name="ShoppingCart"
+          component={ShoppingCart}
+          initialParams={{ cart }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
